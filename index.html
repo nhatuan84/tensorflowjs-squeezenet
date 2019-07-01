@@ -1,0 +1,35 @@
+  <img id="img" src="b.jpg"> 
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>
+  <script>
+    let mobilenet;
+      const mobilenetDemo = async () => {
+        const MODEL_PATH = 'file:///home/tuan/working/learning/tensorflow.js/model.json';
+        mobilenet = await tf.loadLayersModel(MODEL_PATH);
+        const imgElement = document.getElementById('img');
+        if (imgElement.complete && imgElement.naturalHeight !== 0) {
+                const logits = tf.tidy(() => {
+                  const img = tf.browser.fromPixels(imgElement).toFloat();
+                  const offset = tf.scalar(128);
+                  const normalized = img.sub(offset);
+                  const batched = normalized.reshape([1, 227, 227, 3]);
+                  return mobilenet.predict(batched);
+                });
+                console.log(logits.argMax(-1).dataSync());
+        } else {
+            imgElement.onload = () => {
+                const logits = tf.tidy(() => {
+                  console.log(imgElement.naturalHeight)
+                  const img = tf.browser.fromPixels(imgElement).toFloat();
+                  const offset = tf.scalar(128);
+                  const normalized = img.sub(offset);
+                  const batched = normalized.reshape([1, 227, 227, 3]);
+                  return mobilenet.predict(batched);
+                });
+                console.log(logits.argMax(-1));
+          }
+        }
+      };
+    mobilenetDemo();
+  </script>
+
+  
